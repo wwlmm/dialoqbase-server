@@ -19,8 +19,11 @@ import {
 import React from "react";
 import { availableEmbeddingTypes } from "../../utils/embeddings";
 import { availableChatModels } from "../../utils/chatModels";
-import { SpiderIcon } from "./SpiderIcon";
-import { GithubIcon } from "./GithubIcon";
+import { SpiderIcon } from "../Icons/SpiderIcon";
+import { GithubIcon } from "../Icons/GithubIcon";
+import { YoutubeIcon } from "../Icons/YoutubeIcon";
+import { ApiIcon } from "../Icons/ApiIcon";
+import { SitemapIcon } from "../Icons/SitemapIcon";
 
 type Props = {
   createBot: (values: any) => void;
@@ -41,6 +44,8 @@ export const BotForm = ({
   form,
   showEmbeddingAndModels,
 }: Props) => {
+  const embeddingType = Form.useWatch("embedding", form);
+
   const [availableSources] = React.useState([
     {
       id: 1,
@@ -55,6 +60,7 @@ export const BotForm = ({
               required: true,
               message: "Please enter the webpage URL",
             },
+           
           ]}
         >
           <input
@@ -90,7 +96,7 @@ export const BotForm = ({
     {
       id: 2,
       value: "file",
-      title: "File (beta)",
+      title: "File",
       icon: DocumentArrowUpIcon,
       formComponent: (
         <>
@@ -183,7 +189,7 @@ export const BotForm = ({
     {
       id: 4,
       value: "crawl",
-      title: "Crawler (beta)",
+      title: "Crawler",
       icon: SpiderIcon,
       formComponent: (
         <>
@@ -254,7 +260,7 @@ export const BotForm = ({
     {
       id: 6,
       value: "github",
-      title: "GitHub (beta)",
+      title: "GitHub",
       icon: GithubIcon,
       formComponent: (
         <>
@@ -279,9 +285,7 @@ export const BotForm = ({
               className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
             />
           </Form.Item>
-          <Row
-          gutter={16}
-          >
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name={["options", "branch"]}
@@ -302,8 +306,7 @@ export const BotForm = ({
             </Col>
             <Col span={12}>
               <Form.Item label="Private repo?" name={["options", "is_private"]}>
-                <Switch 
-                className="mr-2" />
+                <Switch className="mr-2" />
               </Form.Item>
             </Col>
           </Row>
@@ -323,13 +326,136 @@ export const BotForm = ({
         </>
       ),
     },
+    {
+      id: 7,
+      value: "youtube",
+      title: "Youtube",
+      icon: YoutubeIcon,
+      formComponent: (
+        <>
+          <Form.Item
+            name="content"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a valid youtube URL",
+              },
+              {
+                pattern: new RegExp(
+                  /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/
+                ),
+                message: "Please enter a valid youtube URL",
+              },
+            ]}
+          >
+            <input
+              type="url"
+              placeholder="Enter the youtube URL"
+              className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+            />
+          </Form.Item>
+
+          <p className="text-sm text-gray-500">
+            If you find any issues, please report them on{" "}
+            <a
+              href="https://github.com/n4ze3m/dialoqbase/issues/new?title=Github%20issue&labels=bug"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              GitHub
+            </a>
+            .
+          </p>
+        </>
+      ),
+    },
+    {
+      id: 8,
+      value: "rest",
+      title: "REST API",
+      icon: ApiIcon,
+      formComponent: (
+        <>
+          <Row gutter={24}>
+            <Col span={6}>
+              <Form.Item
+                name={["options", "method"]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a method",
+                  },
+                ]}
+              >
+                <Select
+                  size="large"
+                  options={[
+                    {
+                      label: "GET",
+                      value: "get",
+                    },
+                    {
+                      label: "POST",
+                      value: "post",
+                    },
+                  ]}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={18}>
+              <Form.Item
+                name="content"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter a valid REST API URL",
+                  },
+                  {
+                    pattern: new RegExp(/^(https?:\/\/)?(www\.)?(.+)\.(.+)$/),
+                    message: "Please enter a valid REST API URL",
+                  },
+                ]}
+              >
+                <input
+                  type="url"
+                  placeholder="Enter the REST API URL"
+                  className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        </>
+      ),
+    },
+    {
+      id: 9,
+      value: "sitemap",
+      title: "Sitemap",
+      icon: SitemapIcon,
+      formComponent: (
+        <Form.Item
+          name="content"
+          rules={[
+            {
+              required: true,
+              message: "Please enter the sitemap URL",
+            }
+          ]}
+        >
+          <input
+            type="url"
+            placeholder="Enter the sitemap URL"
+            className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+          />
+        </Form.Item>
+      ),
+    },
   ]);
 
   const [selectedSource, _setSelectedSource] = React.useState<any>(
-    availableSources[0]
+    showEmbeddingAndModels ? null : availableSources[0]
   );
-
-  const embeddingType = Form.useWatch("embedding", form);
 
   return (
     <Form
@@ -345,6 +471,9 @@ export const BotForm = ({
         options: {
           branch: "main",
           is_private: false,
+          method: "get",
+          headers: "{}",
+          body: "{}",
         },
       }}
     >
@@ -359,7 +488,7 @@ export const BotForm = ({
           Select a data source
         </RadioGroup.Label>
 
-        <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+        <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
           {availableSources.map((source) => (
             <RadioGroup.Option
               key={source.id}
@@ -402,7 +531,37 @@ export const BotForm = ({
         </div>
       </RadioGroup>
 
-      {selectedSource.formComponent}
+      {selectedSource && selectedSource.formComponent}
+
+      {selectedSource && selectedSource.value === "rest" && (
+        <Row gutter={24}>
+          <Col span={12}>
+            <Form.Item name={["options", "headers"]} label="Headers">
+              <textarea
+                placeholder="Enter the headers"
+                className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name={["options", "body"]}
+              label="Body (JSON)"
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter a valid JSON",
+                },
+              ]}
+            >
+              <textarea
+                placeholder="Enter the body"
+                className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      )}
 
       <Form.Item hidden={!showEmbeddingAndModels} noStyle>
         <Divider />
@@ -420,7 +579,6 @@ export const BotForm = ({
           options={availableChatModels}
         />
       </Form.Item>
-
       <Form.Item
         hidden={!showEmbeddingAndModels}
         label={

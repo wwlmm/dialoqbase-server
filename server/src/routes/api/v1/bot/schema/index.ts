@@ -1,18 +1,18 @@
 import { FastifySchema } from "fastify";
 import { supportedEmbeddings } from "../../../../../utils/embeddings";
 import { supportedModels } from "../../../../../utils/models";
+import { SUPPORTED_SOURCE_TYPES } from "../../../../../utils/datasource";
 
 export const createBotSchema: FastifySchema = {
   body: {
     type: "object",
-    required: ["content", "type"],
     properties: {
       content: {
         type: "string",
       },
       type: {
         type: "string",
-        enum: ["text", "website", "crawl", "github"],
+        enum: SUPPORTED_SOURCE_TYPES,
       },
       name: {
         type: "string",
@@ -69,7 +69,7 @@ export const addNewSourceByIdSchema: FastifySchema = {
       },
       type: {
         type: "string",
-        enum: ["text", "website", "crawl", "github"],
+        enum: SUPPORTED_SOURCE_TYPES,
       },
       maxDepth: {
         type: "number",
@@ -120,6 +120,9 @@ export const updateBotByIdSchema: FastifySchema = {
       showRef: {
         type: "boolean",
       },
+      use_hybrid_search: {
+        type: "boolean",
+      }
     },
   },
 };

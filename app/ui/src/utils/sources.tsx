@@ -1,5 +1,7 @@
-import { GithubIcon } from "../components/Common/GithubIcon";
-import { SpiderIcon } from "../components/Common/SpiderIcon";
+import { ApiIcon } from "../components/Icons/ApiIcon";
+import { GithubIcon } from "../components/Icons/GithubIcon";
+import { SpiderIcon } from "../components/Icons/SpiderIcon";
+import { YoutubeIcon } from "../components/Icons/YoutubeIcon";
 
 export const sources = {
   website: (
@@ -108,6 +110,7 @@ export const sources = {
   ),
   crawl: <SpiderIcon className="h-4 w-4" />,
   github: <GithubIcon className="h-4 w-4" />,
+  youtube: <YoutubeIcon className="h-4 w-4" />,
   mp3: (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -146,4 +149,5 @@ export const sources = {
       <rect width="8" height="6" x="2" y="12" rx="1"></rect>
     </svg>
   ),
+  rest: <ApiIcon className="h-4 w-4" />,
 };

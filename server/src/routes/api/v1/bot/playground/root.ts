@@ -4,8 +4,10 @@ import {
   chatRequestStreamHandler,
   getPlaygroundHistoryByBotId,
   getPlaygroundHistoryByBotIdAndHistoryId,
+  updateBotAudioSettingsHandler,
 } from "./handlers";
 import {
+  audioSettingsSchema,
   chatPlaygroundHistoryIdSchema,
   chatPlaygroundHistorySchema,
   chatRequestSchema,
@@ -26,11 +28,18 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
 
   fastify.get("/:id/history", {
     schema: chatPlaygroundHistorySchema,
+    onRequest: [fastify.authenticate],
   }, getPlaygroundHistoryByBotId);
 
   fastify.get("/:id/history/:history_id", {
     schema: chatPlaygroundHistoryIdSchema,
+    onRequest: [fastify.authenticate],
   }, getPlaygroundHistoryByBotIdAndHistoryId);
+
+  fastify.post("/:id/voice", {
+    schema: audioSettingsSchema,
+    onRequest: [fastify.authenticate],
+  }, updateBotAudioSettingsHandler);
 };
 
 export default root;

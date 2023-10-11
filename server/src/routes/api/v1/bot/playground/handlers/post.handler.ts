@@ -1,9 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { ChatRequestBody } from "./types";
+import { ChatRequestBody, UpdateBotAudioSettings } from "./types";
 import { DialoqbaseVectorStore } from "../../../../../../utils/store";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
 import { embeddings } from "../../../../../../utils/embeddings";
 import { chatModelProvider } from "../../../../../../utils/models";
+import { DialoqbaseHybridRetrival } from "../../../../../../utils/hybrid";
+import { BaseRetriever } from "langchain/schema/retriever";
 
 export const chatRequestHandler = async (
   request: FastifyRequest<ChatRequestBody>,
@@ -18,6 +20,7 @@ export const chatRequestHandler = async (
   const bot = await prisma.bot.findFirst({
     where: {
       id: bot_id,
+      user_id: request.user.user_id,
     },
   });
 
@@ -46,19 +49,30 @@ export const chatRequestHandler = async (
   const sanitizedQuestion = message.trim().replaceAll("\n", " ");
   const embeddingModel = embeddings(bot.embedding);
 
-  const vectorstore = await DialoqbaseVectorStore.fromExistingIndex(
-    embeddingModel,
-    {
+  let retriever: BaseRetriever;
+
+  if (bot.use_hybrid_search) {
+    retriever = new DialoqbaseHybridRetrival(embeddingModel, {
       botId: bot.id,
       sourceId: null,
-    },
-  );
+    });
+  } else {
+    const vectorstore = await DialoqbaseVectorStore.fromExistingIndex(
+      embeddingModel,
+      {
+        botId: bot.id,
+        sourceId: null,
+      },
+    );
+
+    retriever = vectorstore.asRetriever();
+  }
 
   const model = chatModelProvider(bot.provider, bot.model, temperature);
 
   const chain = ConversationalRetrievalQAChain.fromLLM(
     model,
-    vectorstore.asRetriever(),
+    retriever,
     {
       qaTemplate: bot.qaPrompt,
       questionGeneratorTemplate: bot.questionGeneratorPrompt,
@@ -153,6 +167,7 @@ export const chatRequestStreamHandler = async (
   const bot = await prisma.bot.findFirst({
     where: {
       id: bot_id,
+      user_id: request.user.user_id,
     },
   });
 
@@ -181,13 +196,24 @@ export const chatRequestStreamHandler = async (
   const sanitizedQuestion = message.trim().replaceAll("\n", " ");
   const embeddingModel = embeddings(bot.embedding);
 
-  const vectorstore = await DialoqbaseVectorStore.fromExistingIndex(
-    embeddingModel,
-    {
+  let retriever: BaseRetriever;
+
+  if (bot.use_hybrid_search) {
+    retriever = new DialoqbaseHybridRetrival(embeddingModel, {
       botId: bot.id,
       sourceId: null,
-    },
-  );
+    });
+  } else {
+    const vectorstore = await DialoqbaseVectorStore.fromExistingIndex(
+      embeddingModel,
+      {
+        botId: bot.id,
+        sourceId: null,
+      },
+    );
+
+    retriever = vectorstore.asRetriever();
+  }
 
   let response: any = null;
 
@@ -230,7 +256,7 @@ export const chatRequestStreamHandler = async (
 
   const chain = ConversationalRetrievalQAChain.fromLLM(
     streamedModel,
-    vectorstore.asRetriever(),
+    retriever,
     {
       qaTemplate: bot.qaPrompt,
       questionGeneratorTemplate: bot.questionGeneratorPrompt,
@@ -311,4 +337,53 @@ export const chatRequestStreamHandler = async (
   });
   await nextTick();
   return reply.raw.end();
+};
+
+export const updateBotAudioSettingsHandler = async (
+  request: FastifyRequest<UpdateBotAudioSettings>,
+  reply: FastifyReply,
+) => {
+  const { id } = request.params;
+  const { type, enabled } = request.body;
+
+  const prisma = request.server.prisma;
+
+  const bot = await prisma.bot.findFirst({
+    where: {
+      id,
+      user_id: request.user.user_id,
+    },
+  });
+
+  if (!bot) {
+    return reply.status(404).send({
+      message: "Bot not found",
+    });
+  }
+
+  if (type === "elevenlabs") {
+    await prisma.bot.update({
+      where: {
+        id,
+      },
+      data: {
+        text_to_voice_enabled: enabled,
+        text_to_voice_type: "elevenlabs",
+      },
+    });
+  } else if (type === "web_api") {
+    await prisma.bot.update({
+      where: {
+        id,
+      },
+      data: {
+        text_to_voice_enabled: enabled,
+        text_to_voice_type: "web_api",
+      },
+    });
+  }
+
+  return {
+    success: true,
+  };
 };
