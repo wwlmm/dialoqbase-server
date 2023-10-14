@@ -19,6 +19,11 @@ import BotAppearanceRoot from "./routes/bot/appearance";
 import { ConfigProvider } from "antd";
 import { StyleProvider } from "@ant-design/cssinjs";
 import BotPlaygroundLayout from "./Layout/BotPlaygroundLayout";
+import BotConversationsRoot from "./routes/bot/conversations";
+import RegisterRoot from "./routes/register";
+import { QueryBoundaries } from "./components/Common/QueryBoundaries";
+import SettingsApplicationRoot from "./routes/settings/application";
+import SettingsTeamsRoot from "./routes/settings/teams";
 
 const router = createHashRouter([
   {
@@ -62,6 +67,22 @@ const router = createHashRouter([
     ),
   },
   {
+    path: "/bot/:id/conversations",
+    element: (
+      <BotPlaygroundLayout>
+        <BotConversationsRoot />
+      </BotPlaygroundLayout>
+    ),
+  },
+  {
+    path: "/bot/:id/conversations/:type/:conversation_id",
+    element: (
+      <BotPlaygroundLayout>
+        <BotConversationsRoot />
+      </BotPlaygroundLayout>
+    ),
+  },
+  {
     path: "/bot/:id/data-sources",
     element: (
       <BotLayout>
@@ -101,12 +122,38 @@ const router = createHashRouter([
     path: "/settings",
     element: (
       <DashboardLayout>
-        <SettingsRoot />
+        <QueryBoundaries>
+          <SettingsRoot />
+        </QueryBoundaries>
       </DashboardLayout>
     ),
   },
+  {
+    path: "/settings/application",
+    element: (
+      <DashboardLayout>
+        <QueryBoundaries>
+          <SettingsApplicationRoot />
+        </QueryBoundaries>
+      </DashboardLayout>
+    ),
+  },
+  {
+    path: "/settings/teams",
+    element: (
+      <DashboardLayout>
+        <QueryBoundaries>
+          <SettingsTeamsRoot />
+        </QueryBoundaries>
+      </DashboardLayout>
+    ),
+  },
+  {
+    path: "/register",
+    element: <RegisterRoot />,
+  },
 ]);
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({});
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ConfigProvider theme={{}}>

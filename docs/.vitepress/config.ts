@@ -86,8 +86,12 @@ export default defineConfig({
             link: "/guide/integration/telegram",
           },
           {
-            text: "Discord (experimental)",
+            text: "Discord (beta)",
             link: "/guide/integration/discord",
+          },
+          {
+            text: "Whatsapp (experimental)",
+            link: "/guide/integration/whatsapp",
           },
         ],
       },
@@ -103,6 +107,25 @@ export default defineConfig({
             text: "Transitioning from Single-User to Multi-User mode",
             link: "/guide/transitioning-from-single-user-to-multi-user-mode",
           },
+        ],
+      },
+      {
+        text: "Application",
+        collapsed: false,
+        items: [
+          {
+            link:
+              "/guide/application/enabling-disabling-user-registration-in-dialoqbase",
+            text: "Enabling/Disabling User Registration",
+          },
+          {
+            link: "/guide/application/adjusting-bots-creation-limit-in-dialoqbase",
+            text: "Adjusting Bots Creation Limit For Users",
+          },
+          {
+            link:"/guide/application/setting-up-dialoqbase-queue-concurrency",
+            text:"Setting up Dialoqbase Queue Concurrency"
+          }
         ],
       },
       {
@@ -132,9 +155,9 @@ export default defineConfig({
           {
             text: "TensorFlow",
             link: "/guide/ai-providers/tensorflow",
-          }
-        ]
-      }
+          },
+        ],
+      },
     ],
 
     socialLinks: [

@@ -9,23 +9,13 @@ import {
 } from "../../../utils/chatModels";
 import axios from "axios";
 import React from "react";
+import {
+  HELPFUL_ASSISTANT_WITH_CONTEXT_PROMPT,
+  HELPFUL_ASSISTANT_WITHOUT_CONTEXT_PROMPT,
+} from "../../../utils/prompts";
+import { BotSettings } from "../../../@types/bot";
 
-export const SettingsCard = ({
-  data,
-}: {
-  data: {
-    id: string;
-    name: string;
-    model: string;
-    public_id: string;
-    temperature: number;
-    embedding: string;
-    qaPrompt: string;
-    questionGeneratorPrompt: string;
-    streaming: boolean;
-    showRef: boolean;
-  };
-}) => {
+export const SettingsCard = ({ data }: { data: BotSettings }) => {
   const [form] = Form.useForm();
   const [disableStreaming, setDisableStreaming] = React.useState(false);
   const params = useParams<{ id: string }>();
@@ -127,6 +117,9 @@ export const SettingsCard = ({
             questionGeneratorPrompt: data.questionGeneratorPrompt,
             streaming: data.streaming,
             showRef: data.showRef,
+            use_hybrid_search: data.use_hybrid_search,
+            bot_protect: data.bot_protect,
+            use_rag: data.use_rag
           }}
           form={form}
           requiredMark={false}
@@ -134,7 +127,7 @@ export const SettingsCard = ({
           layout="vertical"
           className="space-y-6 mb-6 "
         >
-          <div className="px-4 py-5 bg-white  shadow sm:rounded-lg sm:p-6">
+          <div className="px-4 py-5 bg-white  border sm:rounded-lg sm:p-6">
             <div className="md:grid md:grid-cols-3 md:gap-6">
               <div className="md:col-span-1">
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -157,7 +150,7 @@ export const SettingsCard = ({
                 >
                   <input
                     type="text"
-                    className="mt-1 block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+                    className="mt-1 block w-full sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
                   />
                 </Form.Item>
 
@@ -257,13 +250,84 @@ export const SettingsCard = ({
                     placeholder=""
                   />
                 </Form.Item>
+                <div className="flex flex-row justify-start gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      form.setFieldsValue({
+                        qaPrompt: HELPFUL_ASSISTANT_WITH_CONTEXT_PROMPT,
+                      });
+                    }}
+                    className="flex items-center rounded-md py-[0.4375rem] pl-2 pr-2 lg:pr-3 bg-white border text-xs"
+                  >
+                    PROMPT WITH CONTEXT
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      form.setFieldsValue({
+                        qaPrompt: HELPFUL_ASSISTANT_WITHOUT_CONTEXT_PROMPT,
+                      });
+                    }}
+                    className="flex items-center rounded-md py-[0.4375rem] pl-2 pr-2 lg:pr-3 bg-white border text-xs"
+                  >
+                    PROMPT WITHOUT CONTEXT
+                  </button>
+                </div>
+
+                <Form.Item
+                  label={
+                    <span className="font-medium text-gray-800 text-sm">
+                      Question Generator Prompt
+                    </span>
+                  }
+                  name="questionGeneratorPrompt"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input a prompt!",
+                    },
+                  ]}
+                >
+                  <textarea
+                    className="mt-1 block w-full sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+                    rows={5}
+                    placeholder=""
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="use_hybrid_search"
+                  label="Use Hybrid Search Retrieval (Beta)"
+                  valuePropName="checked"
+                  tooltip="This will use the hybrid search retrieval method instead of the default semantic search retrieval method. Only work on playground ui."
+                >
+                  <Switch />
+                </Form.Item>
+
+                <Form.Item
+                  name="bot_protect"
+                  label="Activate Public Bot Protection (Beta)"
+                  valuePropName="checked"
+                  tooltip="This will activate the public bot protection using session to avoid misuse of the bot"
+                >
+                  <Switch />
+                </Form.Item>
+
+                <Form.Item
+                  name="use_rag"
+                  label="Use Retrieval Augmented Generation (RAG)"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
               </div>
             </div>
 
             <div className="mt-3 text-right">
               <button
                 type="submit"
-                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 {isLoading ? "Saving..." : "Save"}
               </button>
@@ -271,7 +335,7 @@ export const SettingsCard = ({
           </div>
         </Form>
 
-        <div className="bg-white shadow sm:rounded-lg">
+        <div className="bg-white border sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900">
               Delete your bot
